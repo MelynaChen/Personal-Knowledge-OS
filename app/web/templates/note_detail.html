@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}{{ note.title }} · Note{% endblock %}
+{% block content %}
+<div class="page-heading"><div><p class="eyebrow"><a href="/tasks/{{ task.id }}/view">← Task Detail</a></p><h1>{{ note.title }}</h1><p class="muted">{{ note.date }} · <a href="/knowledge/{{ node.id }}/view">{{ node.display_path }}</a></p></div>{% if notion_url %}<a class="button secondary" href="{{ notion_url }}" target="_blank" rel="noopener noreferrer">Open in Notion ↗</a>{% endif %}</div>
+{% for key, label, value in fields %}
+<section class="card note-section"><h2>{{ label }}</h2>
+{% if key == 'detailed_explanation' %}
+  {% for section in note_sections(value) %}{% if section.heading %}<h3 class="note-subhead">【{{ section.heading }}】</h3>{% endif %}<div class="pre-wrap">{{ section.text }}</div>{% endfor %}
+{% elif value is string %}<div class="pre-wrap">{{ value or '—' }}</div>
+{% elif value %}<ul>{% for item in value %}<li class="pre-wrap">{{ item }}</li>{% endfor %}</ul>
+{% else %}<p class="empty">暂无内容。</p>{% endif %}
+</section>
+{% endfor %}
+{% endblock %}

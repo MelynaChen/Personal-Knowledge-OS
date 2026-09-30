@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Import · Personal Knowledge OS{% endblock %}
+{% block content %}
+<div class="page-heading"><div><p class="eyebrow">Daily import</p><h1>Import</h1><p class="muted">粘贴 ChatGPT JSON，先预览，再保存并同步到 Notion。</p></div></div>
+<section class="card">
+  <h2>1 · Paste ChatGPT JSON</h2>
+  <textarea id="rawText" class="json-input" spellcheck="false" aria-label="Paste ChatGPT JSON" placeholder="在此粘贴完整 JSON"></textarea>
+  <div class="button-row"><button id="sampleButton" type="button" class="button secondary">Load Example</button><button id="previewButton" type="button" class="button">Preview</button></div>
+  <p id="editorMessage" class="feedback" role="status"></p>
+</section>
+<section class="card">
+  <h2>2 · Preview</h2>
+  <div id="previewResult" class="empty">预览后会显示每项任务的日期、内容和状态。</div>
+  <p class="notice">Commit &amp; Sync 会写入本地 SQLite，并由 Worker 同步到真实 Notion。重复内容不会新建第二组页面。</p>
+  <button id="commitButton" type="button" class="button" disabled>Commit &amp; Sync</button>
+  <p id="commitMessage" class="feedback" role="status"></p>
+</section>
+<section class="card">
+  <h2>3 · Sync Status</h2>
+  <p class="muted small">提交后每 5 秒自动刷新。也可以输入已有的 Import ID 查询。</p>
+  <div class="button-row"><label for="importId">Import ID</label><input id="importId" type="number" min="1" inputmode="numeric" class="short-input"><button id="statusButton" type="button" class="button secondary">刷新</button></div>
+  <div id="statusResult" class="feedback" role="status">尚未提交。</div>
+</section>
+{% endblock %}
+{% block scripts %}<script src="/static/import.js" defer></script>{% endblock %}

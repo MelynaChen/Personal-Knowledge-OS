@@ -1,55 +1,26 @@
-# Personal Knowledge OS — Phase 3
+# Personal Knowledge OS — Daily Dashboard
 
-SQLite 是业务数据的唯一真实来源。用户把 ChatGPT Plus 生成的 JSON 粘贴到导入接口；系统先保存到 SQLite，再由独立 Worker 单向同步到 Notion。程序不调用 OpenAI API，也不需要 `OPENAI_API_KEY`。
+本地 SQLite 是唯一真实来源；独立 Worker 将新导入的数据单向同步到 Notion。日常操作都可以在浏览器完成，不调用 OpenAI API，也不需要 `OPENAI_API_KEY`。
 
-## 安装和本地服务
+## 启动
 
-初次使用需要 Python 3.12。在 PowerShell 中：
+需要 Python 3.12。首次安装时在项目根目录执行 `python -m venv .venv`、`python -m pip install -e ".[dev]"`；仅首次创建配置文件时复制 `.env.example` 为 `.env`，填入 `NOTION_TOKEN` 和 `NOTION_PARENT_PAGE_ID`，并在 Notion 父页面授权 Integration。不要覆盖已有 `.env`，也不要提交它。
+
+每次更新代码后，先在项目根目录执行：
 
 ```powershell
-cd C:\Users\Melyn\Documents\Codex\2026-09-29\new-chat\personal-knowledge-os
-python -m venv .venv
-.\.venv\Scripts\Activate.ps1
-python -m pip install -e ".[dev]"
-Copy-Item .env.example .env  # 仅首次创建，已有 .env 时不要覆盖
 alembic upgrade head
+```
+
+Terminal 1，启动网页：
+
+```powershell
+cd C:\Users\Melyn\Documents\Codex\2026-09-29\new-chat\personal-knowledge-os
+.\.venv\Scripts\Activate.ps1
 uvicorn app.main:app --host 127.0.0.1 --port 8000
 ```
 
-完成配置后的启动方式
-```powershell
-cd C:\Users\Melyn\Documents\Codex\2026-09-29\new-chat\personal-knowledge-os\.venv\Scripts
-python -m venv .venv
-python -m app.workers.sync_worker
-uvicorn app.main:app --host 127.0.0.1 --port 8000
-```
-
-打开 `http://127.0.0.1:8000/docs` 查看 API。未配置 Notion 时，本地预览、提交和 FastAPI 均可使用；初始化、Worker 和同步需要 Notion 配置。
-
-### 网页导入示范
-
-打开 `http://127.0.0.1:8000/`。点击“载入示例 JSON”（或粘贴自己的 JSON），再点“预览”。确认任务和知识路径后，点“提交并同步”。页面会显示 Import ID，并每 5 秒刷新 Worker 同步状态。载入示例和预览不会写入数据；只有提交会写入 SQLite，并让 Worker 向 Notion 创建页面。修改 JSON 后必须重新预览。若 FastAPI 已经在运行且没有使用 `--reload`，更新代码后先重启 FastAPI 进程。
-
-## Notion 配置
-
-1. 在 Notion 的 integrations 页面创建内部 Integration，复制其密钥到 `.env` 的 `NOTION_TOKEN`。不要把 `.env` 加入版本控制。
-2. 创建一个供本系统使用的父页面，用该页面菜单的 **Connections / Add connections** 授权刚创建的 Integration。
-3. 复制父页面 URL 中的页面 ID 到 `.env` 的 `NOTION_PARENT_PAGE_ID`。
-4. 执行初始化与检查：
-
-```powershell
-python -m app.cli notion health
-python -m app.cli notion init
-python -m app.cli notion verify
-```
-
-`notion init` 可以重跑：程序先检查 SQLite 记录和父页面已有数据库，再补建缺失的四个数据库、Relation 和 Property ID。若用户手工删除或改动必需字段，验证会返回 `SchemaMismatch`，同步会停止。
-
-## 导入与同步
-
-先向 `POST /import/preview` 发送 `{"raw_text":"...JSON..."}`，取得 `preview_hash`。再向 `POST /import/commit` 发送相同 `raw_text` 和 `preview_hash`。提交仅写 SQLite 和持久队列，返回 HTTP 202、`import_id`、`sync_status`。
-
-在另一终端启动独立 Worker：
+Terminal 2，启动同步 Worker：
 
 ```powershell
 cd C:\Users\Melyn\Documents\Codex\2026-09-29\new-chat\personal-knowledge-os
@@ -57,22 +28,25 @@ cd C:\Users\Melyn\Documents\Codex\2026-09-29\new-chat\personal-knowledge-os
 python -m app.workers.sync_worker
 ```
 
-开发时可用 `python -m app.cli sync once` 执行一批待处理操作。`GET /imports/{id}` 返回每项本地保存与 Notion 同步状态；`POST /imports/{id}/retry` 只重新排队可重试的失败操作。
+Browser：打开 **http://127.0.0.1:8000**。已有 FastAPI 进程没有使用 `--reload` 时，修改代码后需重启该进程。
 
-远端页面按 `External ID` 检索和绑定。创建结果未知时会延迟复查，不能立即重复 POST。正文保存在应用专用 Toggle 内，批次标记用于重试恢复；用户在 Toggle 外添加的内容不会被清理。首次写入后内容默认不变；内容哈希改变时需要人工处理，Phase 3 不自动合并。Notion → SQLite 同步尚未实现。
+## 每日使用
 
-## 测试与手动 Smoke Test
+1. 从 Dashboard 的 **Copy Prompt Context** 打开 Prompt Helper，复制已有知识树和复用规则，粘贴到 ChatGPT 每日任务中。
+2. ChatGPT 生成 JSON 后，在 **Import** 页面粘贴，或先用 **Load Example** 试用。
+3. 点击 **Preview**。检查日期、知识路径和 `NEW`、`DUPLICATE`、`CONFLICT` 状态；冲突时不能提交。
+4. 点击 **Commit & Sync**。这一步才会写入 SQLite；Worker 随后同步到 Notion。页面每 5 秒刷新状态，完成后显示 **Synced to Notion**。示例提交同样会写入真实数据。
+5. 在 Dashboard 查看今日任务，点击任务调整本地状态、阅读 Note。在 Reviews 页面给到期复习打 1～5 分。
+6. History 可查看原始 JSON、同步步骤与错误，并对可重试的失败操作使用 **Retry Failed Sync**。System 显示连接、队列和数据库状态。
 
-自动化测试全部使用 mock，不调用真实 Notion：
+Task Status 的三种值是 `Not started`、`In progress`、`Done`，本阶段仅在本地 SQLite 更新；不会修改已经同步的 Notion 正文。Prompt Helper 只生成可复制文本，不自动调用 ChatGPT。
+
+## 开发与诊断
+
+`/docs` 保留用于开发调试，普通日常使用无需打开。`python -m app.cli notion health`、`notion verify` 和 `sync once` 仍可用于诊断；初始化命令 `python -m app.cli notion init` 可重复执行。自动测试全部使用隔离数据库和 mock，不访问真实 Notion：
 
 ```powershell
-python -m pytest -q
+python -m pytest
 ```
 
-只有在配置好 Token、父页面并明确希望在真实 Notion 写入测试页时，手动执行：
-
-```powershell
-python scripts/notion_smoke_test.py
-```
-
-该脚本会初始化 Schema、创建一个带 `TEST-PKOS` 标记的知识页并读回。默认不删除测试页。SQLite 数据库位于 `data/`，运行中备份请使用 SQLite 在线备份功能，或停机后复制数据库及关联文件。
+手动真实 Notion smoke test 为 `python scripts/notion_smoke_test.py`；它会创建带 `TEST-PKOS` 标记的页面，默认不删除。SQLite 位于项目 `data/`，运行中备份应使用 SQLite 在线备份功能，或停机后复制数据库及关联文件。

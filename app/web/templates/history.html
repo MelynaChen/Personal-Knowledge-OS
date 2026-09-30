@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}History · Personal Knowledge OS{% endblock %}
+{% block content %}
+<div class="page-heading"><div><p class="eyebrow">Local records</p><h1>Import History</h1><p class="muted">最近的导入与 Notion 同步状态。</p></div><a class="button" href="/import">新建导入</a></div>
+<section class="card table-card">
+{% if rows %}
+<div class="table-wrap"><table><thead><tr><th>Date</th><th>Task</th><th>Import ID</th><th>Local Status</th><th>Notion Sync</th><th>Created At</th></tr></thead><tbody>
+{% for row in rows %}<tr>
+  <td>{{ row.task.date if row.task else row.record.normalized_json.get('date', '—') }}</td>
+  <td><a href="/history/{{ row.record.id }}">{{ row.task.name if row.task else '任务 ' ~ (row.item.item_index + 1) }}</a></td>
+  <td>#{{ row.record.id }}</td><td>{{ row.item.status }}</td>
+  <td><span class="badge status-{{ row.sync_status|replace(' ', '-') }}">{{ row.sync_status }}</span></td>
+  <td>{{ row.record.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+</tr>{% endfor %}
+</tbody></table></div>
+{% else %}<p class="empty">还没有导入记录。</p>{% endif %}
+</section>
+{% endblock %}

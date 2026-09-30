@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block title %}{{ task.name }} · Task{% endblock %}
+{% block content %}
+<div class="page-heading"><div><p class="eyebrow"><a href="/">← Dashboard</a></p><h1>{{ task.name }}</h1><p class="muted">{{ task.date }} · {{ node.display_path }} · {{ task.priority }}</p></div>{% if notion_url %}<a class="button secondary" href="{{ notion_url }}" target="_blank" rel="noopener noreferrer">Open in Notion ↗</a>{% endif %}</div>
+<div class="two-column">
+<section class="card"><h2>Learning Task</h2><h3>Learning Goal</h3><p class="pre-wrap">{{ task.learning_goal }}</p><h3>Action Steps</h3><ol>{% for step in task.action_steps_json %}<li>{{ step }}</li>{% endfor %}</ol><h3>Output Required</h3><p class="pre-wrap">{{ task.output_required }}</p></section>
+<section class="card"><h2>Progress</h2><label for="taskStatus">Task Status</label><select id="taskStatus" data-task-id="{{ task.id }}">{% for option in ['Not started', 'In progress', 'Done'] %}<option value="{{ option }}" {% if task.status == option %}selected{% endif %}>{{ option }}</option>{% endfor %}</select><p id="taskStatusMessage" class="feedback" role="status"></p><dl class="details-grid"><dt>Knowledge</dt><dd><a href="/knowledge/{{ node.id }}/view">{{ node.display_path }}</a></dd><dt>Note</dt><dd>{% if note %}<a href="/notes/{{ note.id }}/view">{{ note.title }}</a>{% else %}—{% endif %}</dd><dt>Review Status</dt><dd>{% if review %}{{ review.status }} · Level {{ review.review_level }} · {{ review.next_review_date }}{% else %}No review{% endif %}</dd><dt>Notion Sync</dt><dd><span class="badge status-{{ sync_status|replace(' ', '-') }}">{{ sync_status }}</span></dd><dt>Notion Page ID</dt><dd class="break-all">{{ mapping.notion_page_id if mapping else 'Pending' }}</dd></dl><p class="muted small">Task Status 保存在本地 SQLite；本阶段不修改已同步的 Notion 正文。</p></section>
+</div>
+{% endblock %}

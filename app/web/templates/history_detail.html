@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Import #{{ record.id }} · Personal Knowledge OS{% endblock %}
+{% block content %}
+<div class="page-heading"><div><p class="eyebrow"><a href="/history">← Import History</a></p><h1>Import #{{ record.id }}</h1><p class="muted">{{ record.created_at.strftime('%Y-%m-%d %H:%M') }} · Local: {{ record.status }}</p></div><button class="button secondary retry-button" type="button" data-import-id="{{ record.id }}">Retry Failed Sync</button></div>
+<p id="retryMessage" class="feedback" role="status"></p>
+{% for row in rows %}
+<section class="card">
+  <div class="section-heading"><h2>{{ row.task.name if row.task else '任务 ' ~ (row.item.item_index + 1) }}</h2><span class="badge status-{{ row.sync_status|replace(' ', '-') }}">{{ row.sync_status }}</span></div>
+  {% if row.task %}
+  <p>Date: {{ row.task.date }} · Priority: {{ row.task.priority }} · Local: {{ row.item.status }}</p>
+  <p>Knowledge Path: <a href="/knowledge/{{ row.node.id }}/view">{{ row.node.display_path }}</a></p>
+  <p><a href="/tasks/{{ row.task.id }}/view">Task Detail</a>{% if row.note %} · <a href="/notes/{{ row.note.id }}/view">Note: {{ row.note.title }}</a>{% endif %}{% if row.review %} · Review Level {{ row.review.review_level }} / {{ row.review.next_review_date }}{% endif %}</p>
+  {% endif %}
+  {% if row.operations %}
+  <h3>Sync Operations</h3>
+  <div class="table-wrap"><table><thead><tr><th>Operation</th><th>Status</th><th>Attempts</th><th>Error summary</th></tr></thead><tbody>
+  {% for op in row.operations %}<tr><td>{{ op.step }}</td><td>{{ op.status }}</td><td>{{ op.attempts }}</td><td>{{ op.last_error or '—' }}</td></tr>{% endfor %}
+  </tbody></table></div>
+  {% endif %}
+  {% if row.logs %}<details><summary>Error History ({{ row.logs|length }})</summary><ul>{% for log in row.logs %}<li>{{ log.created_at }} · {{ log.error_category }} · {{ log.message }}</li>{% endfor %}</ul></details>{% endif %}
+</section>
+{% endfor %}
+<section class="card"><h2>Raw Import JSON</h2><p class="muted small">仅供回看；页面会自动转义内容。</p><pre class="raw-json">{{ record.raw_text }}</pre></section>
+{% endblock %}

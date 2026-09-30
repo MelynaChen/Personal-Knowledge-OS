@@ -5,36 +5,12 @@ from sqlalchemy.orm import Session
 
 from app.config.settings import get_settings
 from app.database.session import SessionLocal, get_session
-from app.models import (ImportItem, ImportRecord, Note, NotionDatabase, Review,
-                        SyncOperation)
+from app.models import ImportItem, ImportRecord, NotionDatabase
 from app.notion.client import NotionConfigurationError, NotionGateway
 from app.notion.databases import TITLES, SchemaMismatch, verify_notion_schema
+from app.services.sync_read_service import item_operations
 
 router = APIRouter(tags=["sync"])
-
-
-def _item_operations(session: Session, task_id: int) -> list[SyncOperation]:
-    note = session.scalar(select(Note).where(Note.task_id == task_id))
-    review = session.scalar(select(Review).where(Review.task_id == task_id))
-    keys = [("task", task_id)]
-    if note:
-        keys.append(("note", note.id))
-    if review:
-        keys.append(("review", review.id))
-    operations = []
-    for kind, local_id in keys:
-        operations.extend(session.scalars(select(SyncOperation).where(
-            SyncOperation.object_type == kind, SyncOperation.local_id == local_id)).all())
-    by_id = {op.id: op for op in operations}
-    for op in list(operations):
-        parent_id = op.depends_on_id
-        while parent_id and parent_id not in by_id:
-            parent = session.get(SyncOperation, parent_id)
-            if parent is None:
-                break
-            by_id[parent.id] = parent
-            parent_id = parent.depends_on_id
-    return list(by_id.values())
 
 
 @router.get("/imports/{import_id}")
@@ -44,7 +20,7 @@ def import_status(import_id: int, session: Session = Depends(get_session)):
         raise HTTPException(404, "import not found")
     items = []
     for item in session.scalars(select(ImportItem).where(ImportItem.import_id == import_id).order_by(ImportItem.item_index)):
-        operations = _item_operations(session, item.task_id) if item.task_id else []
+        operations = item_operations(session, item.task_id) if item.task_id else []
         sync_status = ("duplicate" if item.status == "duplicate" else
                        "failed" if any(op.status == "failed" for op in operations) else
                        "completed" if operations and all(op.status == "completed" for op in operations) else
@@ -66,7 +42,7 @@ def retry_import(import_id: int, session: Session = Depends(get_session)):
         for item in session.scalars(select(ImportItem).where(ImportItem.import_id == import_id)):
             if not item.task_id:
                 continue
-            for op in _item_operations(session, item.task_id):
+            for op in item_operations(session, item.task_id):
                 if op.status == "failed" and op.last_error and any(
                     marker in op.last_error for marker in ("rate_limited", "server", "transport")):
                     op.status = "pending"

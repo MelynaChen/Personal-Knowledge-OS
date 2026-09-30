@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}Reviews · Personal Knowledge OS{% endblock %}
+{% block content %}
+<div class="page-heading"><div><p class="eyebrow">Review Queue</p><h1>Today's Reviews</h1><p class="muted">对到期内容打分，系统沿用现有复习算法安排下一次日期。</p></div></div>
+{% for key, title in [('overdue', 'Overdue'), ('today', 'Today'), ('upcoming', 'Upcoming')] %}
+<section class="card">
+  <div class="section-heading"><h2>{{ title }}</h2><span class="count">{{ groups[key]|length }}</span></div>
+  {% if groups[key] %}{% for row in groups[key] %}{% include "partials/review_card.html" %}{% endfor %}
+  {% else %}<p class="empty">没有{{ {'overdue':'逾期','today':'今日','upcoming':'未来'}[key] }}复习。</p>{% endif %}
+</section>
+{% endfor %}
+{% endblock %}

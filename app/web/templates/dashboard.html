@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}Dashboard · Personal Knowledge OS{% endblock %}
+{% block content %}
+<div class="page-heading">
+  <div><p class="eyebrow">{{ day }}</p><h1>Today</h1><p class="muted">今日学习、复习和同步状态</p></div>
+  <a class="button" href="/import">导入新任务</a>
+</div>
+<section class="stats-grid" aria-label="今日概况">
+  <div class="stat-card"><span>今日任务</span><strong>{{ task_count }}</strong></div>
+  <div class="stat-card"><span>待复习</span><strong>{{ due_count }}</strong></div>
+  <div class="stat-card"><span>同步异常</span><strong>{{ failed_count }}</strong><a href="/system">查看系统状态 →</a></div>
+</section>
+<section class="card">
+  <div class="section-heading"><h2>Today Tasks</h2><a href="/history">查看导入历史</a></div>
+  {% if tasks %}
+  <div class="task-list">
+    {% for row in tasks %}
+    <article class="task-row">
+      <div><h3><a href="/tasks/{{ row.task.id }}/view">{{ row.task.name }}</a></h3>
+        <p class="meta-line">{{ row.node.display_path }} · {{ row.task.priority }} · {{ row.task.status }}</p>
+        {% if row.note %}<a class="sub-link" href="/notes/{{ row.note.id }}/view">Note: {{ row.note.title }}</a>{% endif %}
+      </div>
+      <span class="badge status-{{ row.sync_status|replace(' ', '-') }}">{{ row.sync_status }}</span>
+    </article>
+    {% endfor %}
+  </div>
+  {% else %}<p class="empty">今天还没有任务。可以从 Import 粘贴 ChatGPT 生成的 JSON。</p>{% endif %}
+</section>
+<div class="two-column">
+  <section class="card">
+    <div class="section-heading"><h2>Today's Reviews</h2><a href="/reviews">查看全部</a></div>
+    {% if reviews %}{% for row in reviews %}{% include "partials/review_card.html" %}{% endfor %}
+    {% else %}<p class="empty">目前没有到期复习。</p>{% endif %}
+  </section>
+  <section class="card">
+    <h2>How to use today</h2>
+    <ol class="steps">
+      <li><a href="/prompt">Copy Prompt Context</a></li>
+      <li>在 ChatGPT 每日任务中生成 JSON</li>
+      <li><a href="/import">Paste JSON</a></li>
+      <li>Preview</li><li>Commit &amp; Sync</li><li>学习</li><li>完成 Review</li>
+    </ol>
+  </section>
+</div>
+{% endblock %}

@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block title %}System · Personal Knowledge OS{% endblock %}
+{% block content %}
+<div class="page-heading"><div><p class="eyebrow">Local diagnostics</p><h1>System</h1><p class="muted">连接、Worker 队列和本地数据库概况。不会显示 Token。</p></div></div>
+<div class="two-column">
+<section class="card"><h2>Notion</h2><dl class="details-grid"><dt>Configured</dt><dd>{{ 'Yes' if configured else 'No' }}</dd><dt>Connected</dt><dd id="notionConnected">Checking…</dd><dt>Initialized</dt><dd id="notionInitialized">Checking…</dd><dt>Schema Valid</dt><dd id="notionSchema">Checking…</dd></dl><p id="notionHealthMessage" class="feedback" role="status"></p></section>
+<section class="card"><h2>Worker</h2><dl class="details-grid"><dt>Pending</dt><dd>{{ counts.get('pending', 0) }}</dd><dt>Processing</dt><dd>{{ counts.get('processing', 0) }}</dd><dt>Failed</dt><dd>{{ counts.get('failed', 0) }}</dd><dt>Completed recent (24h)</dt><dd>{{ completed_recent }}</dd><dt>Stale lease</dt><dd>{{ stale }}</dd></dl><p class="muted small">Stale 仅显示，页面不会自动修改操作。</p></section>
+</div>
+<section class="card"><h2>Database</h2><dl class="details-grid"><dt>SQLite path</dt><dd class="break-all">{{ sqlite_path }}</dd><dt>Alembic version</dt><dd>{{ alembic_revision }}</dd></dl></section>
+{% endblock %}
+{% block scripts %}<script src="/static/system.js" defer></script>{% endblock %}

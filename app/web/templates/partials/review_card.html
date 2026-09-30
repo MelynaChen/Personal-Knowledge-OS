@@ -1,0 +1,15 @@
+<article class="review-card" data-review-id="{{ row.review.id }}" data-version="{{ row.review.version }}" data-level="{{ row.review.review_level }}">
+  <div class="review-copy">
+    <h3><a href="/knowledge/{{ row.node.id }}/view">{{ row.node.name }}</a></h3>
+    <p><a href="/notes/{{ row.note.id }}/view">{{ row.note.title }}</a></p>
+    <div class="meta-line">Level {{ row.review.review_level }} · {{ row.review.next_review_date }} · {{ row.review.difficulty }}</div>
+  </div>
+  {% if row.review.next_review_date <= day %}
+  <div class="review-actions" aria-label="为 {{ row.node.name }} 评分">
+    {% for score, label in [(1, '完全忘记'), (2, '比较模糊'), (3, '基本记住'), (4, '熟练'), (5, '掌握')] %}
+      <button type="button" class="score-button" data-score="{{ score }}" title="{{ label }}">{{ score }}<span>{{ label }}</span></button>
+    {% endfor %}
+  </div>
+  {% endif %}
+  <p class="review-result" role="status"></p>
+</article>

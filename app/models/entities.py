@@ -65,6 +65,7 @@ class Task(Base, TimeMixin):
     name: Mapped[str] = mapped_column(String(200))
     category: Mapped[str] = mapped_column(String(100))
     priority: Mapped[str] = mapped_column(String(20))
+    status: Mapped[str] = mapped_column(String(20), default="Not started", nullable=False)
     learning_goal: Mapped[str] = mapped_column(Text)
     action_steps_json: Mapped[list] = mapped_column(JSON)
     output_required: Mapped[str] = mapped_column(Text)

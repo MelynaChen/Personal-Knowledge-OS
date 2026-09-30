@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+{% block title %}Daily Prompt Helper · Personal Knowledge OS{% endblock %}
+{% block content %}
+<div class="page-heading"><div><p class="eyebrow">ChatGPT context</p><h1>Daily Prompt Helper</h1><p class="muted">从本地知识树生成可复制文本；不会调用 OpenAI API。</p></div></div>
+<section class="card"><div class="section-heading"><h2>当前 Knowledge Tree</h2><button class="button secondary copy-button" type="button" data-copy-target="treeText">Copy Knowledge Tree</button></div><pre id="treeText" class="prompt-text">当前 Knowledge Tree：
+{{ tree_text }}</pre></section>
+<section class="card"><div class="section-heading"><h2>Daily Prompt Context</h2><button class="button copy-button" type="button" data-copy-target="dailyContext">Copy Daily Prompt Context</button></div><pre id="dailyContext" class="prompt-text">{{ daily_context }}</pre><p id="copyMessage" class="feedback" role="status"></p></section>
+{% endblock %}

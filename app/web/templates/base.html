@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Personal Knowledge OS{% endblock %}</title>
+  <link rel="stylesheet" href="/static/app.css">
+  <script src="/static/app.js" defer></script>
+  {% block head %}{% endblock %}
+</head>
+<body>
+  <header class="site-header">
+    <div class="header-inner">
+      <a class="brand" href="/">Personal Knowledge OS</a>
+      <nav aria-label="主导航">
+        <a href="/" {% if active == 'dashboard' %}aria-current="page"{% endif %}>Dashboard</a>
+        <a href="/import" {% if active == 'import' %}aria-current="page"{% endif %}>Import</a>
+        <a href="/knowledge" {% if active == 'knowledge' %}aria-current="page"{% endif %}>Knowledge</a>
+        <a href="/reviews" {% if active == 'reviews' %}aria-current="page"{% endif %}>Reviews</a>
+        <a href="/history" {% if active == 'history' %}aria-current="page"{% endif %}>History</a>
+        <a href="/system" {% if active == 'system' %}aria-current="page"{% endif %}>System</a>
+      </nav>
+    </div>
+  </header>
+  <main class="page-shell">
+    {% block content %}{% endblock %}
+  </main>
+  <footer class="site-footer">SQLite 是唯一真实来源 · Notion 单向同步 · <a href="/prompt">Daily Prompt Helper</a></footer>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

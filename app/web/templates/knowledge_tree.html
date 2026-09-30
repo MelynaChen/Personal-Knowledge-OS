@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% macro branch(rows) %}
+<ul class="tree-list">
+{% for row in rows %}<li>
+  {% if row.children %}<details open><summary><span>{{ row.node.name }}</span><span class="tree-meta">Level {{ row.node.level }} · {{ row.task_count }} Tasks · {{ row.note_count }} Notes</span></summary>
+    <a class="tree-detail" href="/knowledge/{{ row.node.id }}/view">查看节点详情 →</a>{{ branch(row.children) }}
+  </details>{% else %}<div class="tree-leaf"><a href="/knowledge/{{ row.node.id }}/view">{{ row.node.name }}</a><span class="tree-meta">Level {{ row.node.level }} · {{ row.task_count }} Tasks · {{ row.note_count }} Notes</span></div>{% endif %}
+</li>{% endfor %}
+</ul>
+{% endmacro %}
+{% block title %}Knowledge Tree · Personal Knowledge OS{% endblock %}
+{% block content %}
+<div class="page-heading"><div><p class="eyebrow">Local structure</p><h1>Knowledge Tree</h1><p class="muted">展开或折叠节点；整棵树由本地 SQLite 一次加载。</p></div><a class="button secondary" href="/prompt">Prompt Helper</a></div>
+<section class="card tree-card">{% if tree %}{{ branch(tree) }}{% else %}<p class="empty">还没有知识节点。导入任务后会自动建立知识路径。</p>{% endif %}</section>
+{% endblock %}
