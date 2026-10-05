@@ -31,7 +31,7 @@ cd C:\Users\Melyn\Documents\Codex\2026-09-29\new-chat\personal-knowledge-os
 python -m app.workers.sync_worker
 ```
 
-Browser：打开 **http://127.0.0.1:8000**。已有 FastAPI 进程没有使用 `--reload` 时，修改代码后需重启该进程。
+Browser：打开 `http://127.0.0.1:8000` 。已有 FastAPI 进程没有使用 `--reload` 时，修改代码后需重启该进程。
 
 ## 每日使用
 
