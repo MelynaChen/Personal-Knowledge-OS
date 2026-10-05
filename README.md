@@ -9,6 +9,28 @@
 
 需要 Python 3.12。首次安装时在项目根目录执行 `python -m venv .venv`、`python -m pip install -e ".[dev]"`；仅首次创建配置文件时复制 `.env.example` 为 `.env`，填入 `NOTION_TOKEN` 和 `NOTION_PARENT_PAGE_ID`，并在 Notion 父页面授权 Integration。不要覆盖已有 `.env`，也不要提交它。
 
+### `NOTION_TOKEN`
+
+这是 **Notion Integration 的 Secret / Token**。去 Notion 的 Integrations 页面创建一个 **Internal Integration**，创建后复制它的 **Internal Integration Secret**。
+
+通常会类似：
+
+```env
+NOTION_TOKEN=ntn_xxxxxxxxxxxxxxxxxxxxxxxxx
+```
+
+### `NOTION_PARENT_PAGE_I`
+这是你希望 Personal Knowledge OS 把内容创建到哪个 Notion 父页面下面。
+例如你在 Notion 新建一个页面：Personal Knowledge OS
+
+打开这个页面后，浏览器 URL 可能类似：
+`https://www.notion.so/Personal-Knowledge-OS-1a2b3c4d5e6f7890abcdef1234567890`
+
+最后这一串 32 位字符：`1a2b3c4d5e6f7890abcdef1234567890`,就是 Page ID。
+因此：`NOTION_PARENT_PAGE_ID=1a2b3c4d5e6f7890abcdef1234567890`
+
+有些 Notion URL 带连字符，例如：`1a2b3c4d-5e6f-7890-abcd-ef1234567890`,通常也可以直接填这个 UUID 形式。
+
 每次更新代码后，先在项目根目录执行：
 
 ```powershell
@@ -18,7 +40,7 @@ alembic upgrade head
 Terminal 1，启动网页：
 
 ```powershell
-cd C:\Users\Melyn\Documents\Codex\2026-09-29\new-chat\personal-knowledge-os
+cd .\personal-knowledge-os
 .\.venv\Scripts\Activate.ps1
 uvicorn app.main:app --host 127.0.0.1 --port 8000
 ```
@@ -26,7 +48,7 @@ uvicorn app.main:app --host 127.0.0.1 --port 8000
 Terminal 2，启动同步 Worker：
 
 ```powershell
-cd C:\Users\Melyn\Documents\Codex\2026-09-29\new-chat\personal-knowledge-os
+cd .\personal-knowledge-os
 .\.venv\Scripts\Activate.ps1
 python -m app.workers.sync_worker
 ```
