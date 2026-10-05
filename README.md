@@ -19,7 +19,7 @@
 NOTION_TOKEN=ntn_xxxxxxxxxxxxxxxxxxxxxxxxx
 ```
 
-### `NOTION_PARENT_PAGE_I`
+### `NOTION_PARENT_PAGE_ID`
 这是你希望 Personal Knowledge OS 把内容创建到哪个 Notion 父页面下面。
 例如你在 Notion 新建一个页面：Personal Knowledge OS
 
@@ -31,6 +31,7 @@ NOTION_TOKEN=ntn_xxxxxxxxxxxxxxxxxxxxxxxxx
 
 有些 Notion URL 带连字符，例如：`1a2b3c4d-5e6f-7890-abcd-ef1234567890`,通常也可以直接填这个 UUID 形式。
 
+### 使用方法
 每次更新代码后，先在项目根目录执行：
 
 ```powershell
