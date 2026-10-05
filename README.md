@@ -2,6 +2,9 @@
 
 本地 SQLite 是唯一真实来源；独立 Worker 将新导入的数据单向同步到 Notion。日常操作都可以在浏览器完成，不调用 OpenAI API，也不需要 `OPENAI_API_KEY`。
 
+## 预览
+<img width="1477" height="1200" alt="image" src="https://github.com/user-attachments/assets/76a1ce20-e421-4553-be1d-873ee55a79e4" />
+
 ## 启动
 
 需要 Python 3.12。首次安装时在项目根目录执行 `python -m venv .venv`、`python -m pip install -e ".[dev]"`；仅首次创建配置文件时复制 `.env.example` 为 `.env`，填入 `NOTION_TOKEN` 和 `NOTION_PARENT_PAGE_ID`，并在 Notion 父页面授权 Integration。不要覆盖已有 `.env`，也不要提交它。
